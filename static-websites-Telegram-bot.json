@@ -1,0 +1,1004 @@
+{
+  "name": "static-websites-Telegram-bot",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        1280
+      ],
+      "id": "7a7e425e-9a08-4455-b713-e5efe30fe0ec",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "0oNEhrbulatCYpUu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ac3d3f88-3006-47dd-968d-82762654d13e",
+              "leftValue": "={{ $json.missingFields.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        944
+      ],
+      "id": "6c0ed18f-3ff7-46b0-8438-d249bffaa07d",
+      "name": "Check Missing Fields1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        624
+      ],
+      "id": "e4238968-7933-4532-bbe5-853949935fff",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "2e1fSTJKDmrpE2YP",
+          "name": "demo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a business analyzer and website planner. Given a raw text message about a business, extract structured data, plan the website, and generate SEO.\n\nReturn ONLY valid JSON, no markdown, no preamble, matching this exact schema:\n\n{\n  \"business\": {\n    \"name\": \"string\",\n    \"type\": \"string\",\n    \"category\": \"Food|Retail|Healthcare|Services|Education|Other\",\n    \"address\": \"string\",\n    \"phone\": \"string\",\n    \"city\": \"string\",\n    \"state\": \"string\",\n    \"pincode\": \"string\",\n    \"targetAudience\": \"string\"\n  },\n  \"missingFields\": [\"list any of: name, type, address, phone that were NOT found\"],\n  \"plan\": {\n    \"template\": \"icecream|restaurant|clinic|salon|retail|generic\",\n    \"theme\": \"Modern|Classic|Minimal|Bold\",\n    \"primaryColor\": \"#hex\",\n    \"secondaryColor\": \"#hex\",\n    \"font\": \"Poppins\",\n    \"sections\": [\"Home\",\"About\",\"Services\",\"Gallery\",\"Contact\"]\n  },\n  \"seo\": {\n    \"title\": \"string under 60 chars\",\n    \"metaDescription\": \"string under 155 chars\",\n    \"keywords\": [\"8-10 keywords\"],\n    \"canonicalUrl\": \"https://example.com/\",\n    \"ogTitle\": \"string\",\n    \"ogDescription\": \"string\",\n    \"twitterCard\": \"summary_large_image\",\n    \"jsonLdSchema\": \"valid JSON-LD LocalBusiness object as a string\"\n  }\n}\n\nALL fields are required. Never omit any field. If phone or address is missing from the input, still return valid complete JSON but list that field in missingFields."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -416,
+        944
+      ],
+      "id": "cc7b78db-adc7-41bf-a203-0d20e4a09de8",
+      "name": "AI Agent: Analyze + Plan + SEO1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n{{seo_head}}\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link href=\"https://fonts.googleapis.com/css2?family={{font_url}}:wght@400;500;600;700&display=swap\" rel=\"stylesheet\">\n<link rel=\"stylesheet\" href=\"style.css\">\n<link rel=\"icon\" href=\"images/favicon.ico\">\n</head>\n<body>\n\n<header class=\"navbar\">\n  <div class=\"logo\">{{company_name}}</div>\n  <button class=\"menu-toggle\" id=\"menuToggle\" aria-label=\"Menu\">☰</button>\n  <nav id=\"navMenu\">\n    <a href=\"#home\">Home</a>\n    <a href=\"#about\">About</a>\n    <a href=\"#services\">Services</a>\n    <a href=\"#contact\">Contact</a>\n    <a href=\"{{call_link}}\" class=\"nav-call-btn\">Call Now</a>\n  </nav>\n</header>\n\n<section id=\"home\" class=\"hero\" style=\"background-image:url('banner.png')\">\n  <div class=\"hero-overlay\"></div>\n  <div class=\"hero-content\">\n    <h1>{{hero_heading}}</h1>\n    <p>{{hero_subheading}}</p>\n    <a href=\"{{call_link}}\" class=\"btn call-btn\">📞 Call Now</a>\n  </div>\n</section>\n\n<section id=\"about\" class=\"about\">\n  <div class=\"section-inner\">\n    <span class=\"eyebrow\">About Us</span>\n    <h2>Who We Are</h2>\n    <p>{{about_us}}</p>\n  </div>\n</section>\n\n<section id=\"services\" class=\"services\">\n  <div class=\"section-inner\">\n    <span class=\"eyebrow\">What We Offer</span>\n    <h2>Our Services</h2>\n    <div class=\"services-grid\">\n      {{services_block}}\n    </div>\n  </div>\n</section>\n\n<section class=\"why-choose\">\n  <div class=\"section-inner\">\n    <span class=\"eyebrow\">Why Choose Us</span>\n    <h2>What Makes Us Different</h2>\n    <div class=\"why-grid\">\n      {{why_choose_block}}\n    </div>\n  </div>\n</section>\n\n<section id=\"contact\" class=\"contact\">\n  <div class=\"section-inner\">\n    <span class=\"eyebrow\">Get In Touch</span>\n    <h2>Contact Us</h2>\n    <div class=\"contact-grid\">\n      <div class=\"contact-card\">\n        <h3>{{company_name}}</h3>\n        <p class=\"contact-address\">📍 {{address}}</p>\n        <a href=\"{{call_link}}\" class=\"contact-phone\">📞 {{phone}}</a>\n        <a href=\"{{call_link}}\" class=\"btn call-btn\" style=\"margin-top:1.5rem;\">Call Now</a>\n      </div>\n      <iframe class=\"contact-map\" src=\"https://maps.google.com/maps?q={{company_name}}&output=embed\" loading=\"lazy\"></iframe>\n    </div>\n  </div>\n</section>\n\n<footer>\n  <p>&copy; 2026 {{company_name}}. All rights reserved. <a href=\"https://karthikeyan-cv.vercel.app/\" target=\"_blank\" rel=\"noopener\">Karthikeyan</a></p>\n</footer>\n\n<script>\ndocument.getElementById('menuToggle').addEventListener('click', function() {\n  document.getElementById('navMenu').classList.toggle('open');\n});\n</script>\n\n</body>\n</html>`;\n\nconst css = `\n:root {\n  --primary: {{primary_color}};\n  --secondary: {{secondary_color}};\n  --font: '{{font}}', sans-serif;\n  --dark: #1a1a1a;\n  --gray: #666;\n  --light-bg: #f8f9fa;\n}\n* { margin:0; padding:0; box-sizing:border-box; }\nhtml { scroll-behavior: smooth; }\nbody { font-family: var(--font); line-height:1.7; color:var(--dark); overflow-x:hidden; }\n\n/* Navbar */\n.navbar {\n  display:flex; justify-content:space-between; align-items:center;\n  padding:1rem 5%; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.06);\n  position:sticky; top:0; z-index:1000;\n}\n.navbar .logo { font-weight:700; font-size:1.5rem; color:var(--primary); }\n.navbar nav { display:flex; align-items:center; gap:2rem; }\n.navbar nav a { text-decoration:none; color:var(--dark); font-weight:500; font-size:0.95rem; transition:color 0.2s; }\n.navbar nav a:hover { color:var(--primary); }\n.nav-call-btn { background:var(--primary); color:#fff !important; padding:0.6rem 1.3rem; border-radius:30px; }\n.menu-toggle { display:none; background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--dark); }\n\n/* Hero */\n.hero {\n  background-size:cover; background-position:center; position:relative;\n  min-height:85vh; display:flex; align-items:center; justify-content:center; text-align:center;\n}\n.hero-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35)); }\n.hero-content { position:relative; z-index:1; color:#fff; max-width:700px; padding:2rem; }\n.hero-content h1 { font-size:3rem; font-weight:700; margin-bottom:1rem; line-height:1.2; }\n.hero-content p { font-size:1.15rem; margin-bottom:2rem; opacity:0.95; }\n.btn { display:inline-block; padding:0.9rem 2rem; border-radius:30px; text-decoration:none; font-weight:600; transition:transform 0.2s, box-shadow 0.2s; }\n.call-btn { background:var(--primary); color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.2); }\n.call-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.28); }\n\n/* Sections general */\nsection { padding:5rem 1.5rem; }\n.section-inner { max-width:1100px; margin:0 auto; text-align:center; }\n.eyebrow { color:var(--primary); font-weight:600; font-size:0.85rem; letter-spacing:1.5px; text-transform:uppercase; }\nsection h2 { font-size:2.2rem; margin:0.6rem 0 2rem; color:var(--dark); }\n.about p { max-width:750px; margin:0 auto; color:var(--gray); font-size:1.05rem; }\n.services { background:var(--light-bg); }\n\n/* Services grid */\n.services-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.8rem; text-align:left; }\n.service-card { background:#fff; padding:2rem; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,0.06); transition:transform 0.25s, box-shadow 0.25s; border-top:4px solid var(--primary); }\n.service-card:hover { transform:translateY(-6px); box-shadow:0 12px 28px rgba(0,0,0,0.1); }\n.service-card h3 { color:var(--primary); margin-bottom:0.6rem; font-size:1.15rem; }\n.service-card p { color:var(--gray); font-size:0.95rem; }\n\n/* Why choose */\n.why-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; text-align:left; }\n.why-item { background:var(--light-bg); padding:1.5rem; border-radius:12px; font-weight:500; border-left:4px solid var(--secondary); }\n\n/* Contact */\n.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; text-align:left; align-items:stretch; }\n.contact-card { background:var(--light-bg); padding:2.5rem; border-radius:16px; display:flex; flex-direction:column; justify-content:center; }\n.contact-card h3 { color:var(--primary); font-size:1.4rem; margin-bottom:1rem; }\n.contact-address { color:var(--gray); margin-bottom:1rem; }\n.contact-phone { display:inline-block; font-size:1.2rem; font-weight:700; color:var(--dark); text-decoration:none; }\n.contact-map { width:100%; height:100%; min-height:300px; border:0; border-radius:16px; }\n\n/* Footer */\nfooter { text-align:center; padding:2rem; background:var(--dark); color:#ccc; font-size:0.9rem; }\nfooter a { color:var(--secondary); text-decoration:none; font-weight:600; margin-left:4px; }\nfooter a:hover { text-decoration:underline; }\n\n/* Responsive */\n@media(max-width:900px){\n  .services-grid { grid-template-columns:repeat(2, 1fr); }\n  .contact-grid { grid-template-columns:1fr; }\n}\n@media(max-width:640px){\n  .menu-toggle { display:block; }\n  .navbar nav {\n    display:none; position:absolute; top:100%; left:0; right:0;\n    background:#fff; flex-direction:column; padding:1.5rem; gap:1rem;\n    box-shadow:0 8px 20px rgba(0,0,0,0.08);\n  }\n  .navbar nav.open { display:flex; }\n  .nav-call-btn { text-align:center; }\n  .hero-content h1 { font-size:2.1rem; }\n  .services-grid { grid-template-columns:1fr; }\n  section { padding:3.5rem 1.2rem; }\n}\n`;\n\nreturn [{ json: { html, css } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        1472
+      ],
+      "id": "5c4e63aa-ef3f-4154-bc5c-87b1f805bf95",
+      "name": "Code: Generate Template (HTML + CSS)1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const template = $('Code: Generate Template (HTML + CSS)1').first().json.html;\nfunction getStoredData() {\n  try { return $('Code: Handle Image Choice1').first().json; } catch (e) {}\n  try { return $('Code: Handle Text Image Choice1').first().json; } catch (e) {}\n  throw new Error('Could not find business/plan/seo data from either image-choice handler node.');\n}\nconst stored = getStoredData();\nconst business = stored.business;\nconst seo = stored.seo;\nconst plan = stored.plan;\nconst content = $('Code: Parse Content JSON1').first().json;\n\nconst seoTitle = seo.title || business.name;\nconst metaDescription = seo.metaDescription || '';\nconst keywords = Array.isArray(seo.keywords) ? seo.keywords.join(', ') : (seo.keywords || '');\nconst ogTitle = seo.ogTitle || seoTitle;\nconst ogDescription = seo.ogDescription || metaDescription;\nconst canonicalUrl = seo.canonicalUrl || 'https://example.com/';\nconst twitterCard = seo.twitterCard || 'summary_large_image';\nconst jsonLdSchema = typeof seo.jsonLdSchema === 'string'\n  ? seo.jsonLdSchema\n  : JSON.stringify(seo.jsonLdSchema || {});\n\nconst seoHead = `\n<title>${seoTitle}</title>\n<meta name=\"title\" content=\"${seoTitle}\">\n<meta name=\"description\" content=\"${metaDescription}\">\n<meta name=\"keywords\" content=\"${keywords}\">\n<meta name=\"robots\" content=\"index, follow\">\n<meta name=\"author\" content=\"Karthikeyan\">\n\n<meta property=\"og:title\" content=\"${ogTitle}\">\n<meta property=\"og:description\" content=\"${ogDescription}\">\n<meta property=\"og:url\" content=\"${canonicalUrl}\">\n<meta property=\"og:type\" content=\"website\">\n<meta property=\"og:locale\" content=\"en_US\">\n\n<meta name=\"twitter:card\" content=\"${twitterCard}\">\n<meta name=\"twitter:title\" content=\"${ogTitle}\">\n<meta name=\"twitter:description\" content=\"${ogDescription}\">\n\n<meta name=\"googlebot\" content=\"index, follow\">\n<meta name=\"bingbot\" content=\"index, follow\">\n\n<link rel=\"canonical\" href=\"${canonicalUrl}\">\n\n<script type=\"application/ld+json\">${jsonLdSchema}</script>\n`;\n\nconst servicesHtml = content.services.length\n  ? content.services.map(s => `<div class=\"service-card\"><h3>${s.title}</h3><p>${s.description}</p></div>`).join('\\n')\n  : '';\n\nconst whyChooseHtml = content.whyChooseUs.length\n  ? content.whyChooseUs.map(w => `<div class=\"why-item\">✔ ${w}</div>`).join('\\n')\n  : '';\n\nconst phoneDigits = business.phone.replace(/\\D/g, '');\nconst fontUrlName = (plan.font || 'Poppins').replace(/\\s+/g, '+');\n\nlet html = template\n  .replaceAll('{{seo_head}}', seoHead)\n  .replaceAll('{{font_url}}', fontUrlName)\n  .replaceAll('{{company_name}}', business.name)\n  .replaceAll('{{phone}}', business.phone)\n  .replaceAll('{{address}}', business.address)\n  .replaceAll('{{hero_heading}}', content.heroHeading)\n  .replaceAll('{{hero_subheading}}', content.heroSubheading)\n  .replaceAll('{{about_us}}', content.aboutUs)\n  .replaceAll('{{call_link}}', `tel:+91${phoneDigits}`)\n  .replaceAll('{{services_block}}', servicesHtml)\n  .replaceAll('{{why_choose_block}}', whyChooseHtml);\n\nreturn [{ json: { html } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        1488
+      ],
+      "id": "ae78f843-20b3-4f58-b6b1-aa37daa6503c",
+      "name": "Code: Fill index.html1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const css = $('Code: Generate Template (HTML + CSS)1').first().json.css;\nfunction getStoredData() {\n  try { return $('Code: Handle Image Choice1').first().json; } catch (e) {}\n  try { return $('Code: Handle Text Image Choice1').first().json; } catch (e) {}\n  throw new Error('Could not find business/plan/seo data from either image-choice handler node.');\n}\nconst plan = getStoredData().plan;\n\nconst filled = css\n  .replaceAll('{{primary_color}}', plan.primaryColor)\n  .replaceAll('{{secondary_color}}', plan.secondaryColor)\n  .replaceAll('{{font}}', plan.font);\n\nreturn [{ json: { css: filled } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        1488
+      ],
+      "id": "fff0631a-9f4f-4632-a036-8c0daf4c63ec",
+      "name": "Code: Fill style.css1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function getStoredData() {\n  try { return $('Code: Handle Image Choice1').first().json; } catch (e) {}\n  try { return $('Code: Handle Text Image Choice1').first().json; } catch (e) {}\n  throw new Error('Could not find business/plan/seo data from either image-choice handler node.');\n}\nconst business = getStoredData().business;\nconst folderName = business.name.replace(/\\s+/g, '_').toLowerCase();\n\nconst html = $('Code: Fill index.html1').first().json.html;\nconst css = $('Code: Fill style.css1').first().json.css;\nconst seoFiles = $('Code: Generate SEO Files1').first().json;\n\n// Properly read the banner image bytes via n8n's binary data helper.\n// Reading binary.data.data directly (the old approach) can silently return\n// an internal storage reference instead of the real image bytes when n8n\n// isn't holding binaries in plain memory (e.g. filesystem/S3 binary mode),\n// which is what was producing a 0 KB banner.png in the zip.\n// This node's own input item now carries the image binary because the\n// \"Merge\" node upstream combines the SEO-files branch with the\n// \"Generate an image\" branch by position before reaching this node.\nconst bannerBuffer = await this.helpers.getBinaryDataBuffer(0, 'data');\n\n\n\nif (!bannerBuffer || bannerBuffer.length === 0) {\n  throw new Error('Banner image buffer is empty. Check that the \"Merge\" node before this step is set to Combine > Combine by Position, and that \"Generate an image\" is actually returning binary data named \"data\".');\n}\n\nconst bannerBinaryData = await this.helpers.prepareBinaryData(bannerBuffer, 'banner.png', 'image/png');\n\nreturn [{\n  json: { folderName },\n  binary: {\n    html: {\n      data: Buffer.from(html).toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html'\n    },\n    css: {\n      data: Buffer.from(css).toString('base64'),\n      mimeType: 'text/css',\n      fileName: 'style.css'\n    },\n    robots: {\n      data: Buffer.from(seoFiles.robots).toString('base64'),\n      mimeType: 'text/plain',\n      fileName: 'robots.txt'\n    },\n    sitemap: {\n      data: Buffer.from(seoFiles.sitemap).toString('base64'),\n      mimeType: 'application/xml',\n      fileName: 'sitemap.xml'\n    },\n    manifest: {\n      data: Buffer.from(seoFiles.manifest).toString('base64'),\n      mimeType: 'application/json',\n      fileName: 'manifest.json'\n    },\n    banner: bannerBinaryData\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        1504
+      ],
+      "id": "6c3b5423-c498-4e9d-ba6b-74591e62d86a",
+      "name": "Code: Save All Files to Disk1"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output;\nraw = raw.replace(/```json|```/g, '').trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  throw new Error('Content AI did not return valid JSON: ' + raw.slice(0, 300));\n}\n\nparsed.services = Array.isArray(parsed.services) ? parsed.services.slice(0, 6) : [];\nparsed.whyChooseUs = Array.isArray(parsed.whyChooseUs) ? parsed.whyChooseUs : [];\nparsed.testimonials = Array.isArray(parsed.testimonials) ? parsed.testimonials : [];\nparsed.heroHeading = parsed.heroHeading || '';\nparsed.heroSubheading = parsed.heroSubheading || '';\nparsed.aboutUs = parsed.aboutUs || '';\nparsed.footerText = parsed.footerText || '';\n\nreturn [{ json: parsed }];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        432
+      ],
+      "id": "6d35d6fe-a0ea-494d-8255-e6cd674d47de",
+      "name": "Code: Parse Content JSON1"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output;\nraw = raw.replace(/```json|```/g, '').trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  throw new Error('Analyze/Plan/SEO AI did not return valid JSON: ' + raw.slice(0, 300));\n}\n\nconst validTemplates = ['icecream','restaurant','clinic','salon','retail','generic'];\nif (!validTemplates.includes(parsed.plan.template)) {\n  parsed.plan.template = 'generic';\n}\n\n// HARD mandatory-field check - business name, type, address, phone are always required\nconst b = parsed.business;\nconst required = { name: b.name, type: b.type, address: b.address, phone: b.phone };\nconst missing = [];\nfor (const [field, value] of Object.entries(required)) {\n  if (!value || String(value).trim() === '' || String(value).toLowerCase().includes('not found') || String(value).toLowerCase().includes('unknown')) {\n    missing.push(field);\n  }\n}\nparsed.missingFields = missing;\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        944
+      ],
+      "id": "112c0de0-351e-4021-86c6-72708d0f36c2",
+      "name": "Code: Parse AI JSON Output1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Business:{{ $json.business.name }} ,\nType:{{ $json.business.type }} ,\nCategory: {{ $json.business.category }},\nCity: {{ $json.business.city }},\nTarget Audience: {{ $json.business.targetAudience }}",
+        "options": {
+          "systemMessage": "=Return ONLY valid JSON, no markdown, no preamble, matching this EXACT schema. ALL fields are required:\n\n{\n  \"heroHeading\": \"string\",\n  \"heroSubheading\": \"string\",\n  \"aboutUs\": \"2-3 paragraphs as a single string\",\n  \"services\": [\n    {\"title\":\"string\",\"description\":\"string\"}\n  ],\n  \"whyChooseUs\": [\"4-5 short points\"],\n  \"testimonials\": [{\"name\":\"string\",\"text\":\"string\",\"rating\":5}],\n  \"footerText\": \"string\",\n  \"ctaText\": \"string\"\n}\n\nIMPORTANT: \"services\" must contain EXACTLY 6 items — never more, never fewer. If the business naturally has fewer offerings, create reasonable related services/specialties to reach exactly 6.\n\nWrite in a warm, local, trustworthy tone matching the business category. Never invent phone numbers or addresses."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        384
+      ],
+      "id": "7b4c4a3f-9917-4efa-96dd-3c14b65477e1",
+      "name": "Website Content Generator (AI Agent)1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const domain = \"https://yourdomain.com\";\nfunction getStoredData() {\n  try { return $('Code: Handle Image Choice1').first().json; } catch (e) {}\n  try { return $('Code: Handle Text Image Choice1').first().json; } catch (e) {}\n  throw new Error('Could not find business/plan/seo data from either image-choice handler node.');\n}\nconst stored = getStoredData();\nconst business = stored.business;\nconst plan = stored.plan;\n\nconst robots = `User-agent: *\\nAllow: /\\n\\nSitemap: ${domain}/sitemap.xml`;\n\nconst sitemap = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url><loc>${domain}/</loc></url>\n</urlset>`;\n\nconst manifest = JSON.stringify({\n  name: business.name,\n  short_name: business.name,\n  start_url: \"/\",\n  display: \"standalone\",\n  background_color: \"#ffffff\",\n  theme_color: plan.primaryColor,\n  icons: [{ src: \"images/favicon.ico\", sizes: \"64x64\", type: \"image/x-icon\" }]\n}, null, 2);\n\nreturn [{ json: { robots, sitemap, manifest } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        1488
+      ],
+      "id": "cb036674-2123-4740-8bdb-6a621f04b367",
+      "name": "Code: Generate SEO Files1"
+    },
+    {
+      "parameters": {
+        "operation": "compress",
+        "binaryPropertyName": "html,css,robots,sitemap,manifest,banner",
+        "fileName": "=websit.zip",
+        "binaryPropertyOutput": "=data"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        1504
+      ],
+      "id": "ddbc647a-c256-49b0-b46a-bcd727a87100",
+      "name": "Compression: ZIP Folder1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=I need a bit more info to build your website. Missing: {{ $json.missingFields.join(', ') }}.\n\nPlease reply with those details (business name, business type, address, and phone number are all required).",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        784
+      ],
+      "id": "5a36a05c-a2c2-4233-be30-10625795eb50",
+      "name": "Telegram: Ask Missing Info1",
+      "webhookId": "8999e265-6c22-49e5-86b0-15c96b27ac12",
+      "credentials": {
+        "telegramApi": {
+          "id": "LnRshgST8DyAFMum",
+          "name": "website"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        1504
+      ],
+      "id": "b3fead68-ab45-4c04-983b-dae04f6f1531",
+      "name": "Merge: SEO Files + Banner Image1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1520,
+        592
+      ],
+      "id": "cb1b5878-d646-49c4-8d72-e405830e4901",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "0oNEhrbulatCYpUu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "= {{ $('Code: Handle Text Image Choice1').item.json.business }}\nnamed {{ $('Code: Handle Text Image Choice1').item.json.business.name }},\ncategory: {{ $('Code: Handle Text Image Choice1').item.json.business.category }}\n",
+        "options": {
+          "systemMessage": "Write one single-line image generation prompt for a website banner image. The prompt MUST be specifically tailored to the exact business type and category given — do not default to generic food or office imagery unless the business is actually food-related.\n\nInclude:\n- Visual elements specific to this exact business type (e.g. an eye clinic = optometry equipment, eye exam chair, clean clinical setting; a restaurant = food, dining ambience; a salon = styling chairs, mirrors, modern interior; a detective/investigation agency = professional office, magnifying glass, confidential file imagery)\n- Mood/lighting: \"professional, well-lit, high quality photography\"\n- Aspect ratio: \"1920x900\"\n\nReturn only the single-line prompt text, nothing else, no explanation."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1520,
+        416
+      ],
+      "id": "a5e8fe69-7bf1-43a1-adcf-b43aef0bca5e",
+      "name": "AI Agent: Banner Prompt Generator1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-image-1-mini"
+        },
+        "prompt": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1776,
+        1056
+      ],
+      "id": "77c014a7-a727-42cd-958c-bfa9aa884755",
+      "name": "Generate an image1",
+      "credentials": {
+        "openAiApi": {
+          "id": "2e1fSTJKDmrpE2YP",
+          "name": "demo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ae34810a-e8fa-4cc6-9423-a4981db17717",
+              "leftValue": "={{ $json.callback_query ? 'callback' : 'message' }}",
+              "rightValue": "callback",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        384
+      ],
+      "id": "69c50b04-b08b-42f9-8aec-b58c6960c90e",
+      "name": "Route: Message or Callback1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('Telegram Trigger').first().json.message.chat.id;\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.pendingSites) staticData.pendingSites = {};\nstaticData.pendingSites[chatId] = $json;\n\nreturn [{ json: { chatId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        960
+      ],
+      "id": "3e88865c-f61e-458d-b556-ff4a651ce57f",
+      "name": "Code: Store Data for Image Choice1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Would you like a banner image on your website?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "With Image",
+                    "additionalFields": {
+                      "callback_data": "with_image"
+                    }
+                  },
+                  {
+                    "text": "Without Image",
+                    "additionalFields": {
+                      "callback_data": "without_image"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        944
+      ],
+      "id": "1bb2368b-da81-4307-aa93-7eb7cbebcce1",
+      "name": "Telegram: Ask Image Choice1",
+      "webhookId": "6f058e17-41a5-4a2d-89ad-9c1685ef3334",
+      "credentials": {
+        "telegramApi": {
+          "id": "LnRshgST8DyAFMum",
+          "name": "website"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $json.callback_query.message.chat.id;\nconst wantsImage = $json.callback_query.data === 'with_image';\n\nconst staticData = $getWorkflowStaticData('global');\nconst stored = (staticData.pendingSites || {})[chatId];\n\nif (!stored) {\n  throw new Error('No pending site request found for this chat. Please send your business details again to start over.');\n}\n\ndelete staticData.pendingSites[chatId];\n\nreturn [{ json: { ...stored, wantsImage } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        128
+      ],
+      "id": "7b9c747a-20ae-4d76-bc39-a39bfdde6713",
+      "name": "Code: Handle Image Choice1"
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Route: Message or Callback1').item.json.callback_query.id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d77ec8f4-3262-4c20-8228-a4e661acabff",
+      "name": "Telegram: Acknowledge Choice1",
+      "webhookId": "a796af6c-699c-46c7-8cfa-74884894e662",
+      "credentials": {
+        "telegramApi": {
+          "id": "LnRshgST8DyAFMum",
+          "name": "website"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e5b1fa61-f57f-4f69-bb5e-32444d88fbba",
+              "leftValue": "={{ $json.wantsImage }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        416
+      ],
+      "id": "57b6b3f2-3f70-4fa8-833a-3df7b96ba497",
+      "name": "Check: Wants Image1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback banner used when the business owner picks \"Without Image\".\n// Embedded as base64 so it never depends on an external URL or API call.\nconst DEFAULT_BANNER_BASE64 = \"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\";\n\nconst bannerBuffer = Buffer.from(DEFAULT_BANNER_BASE64, 'base64');\nconst bannerBinaryData = await this.helpers.prepareBinaryData(bannerBuffer, 'banner.png', 'image/png');\n\nreturn [{ json: $json, binary: { data: bannerBinaryData } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        1008
+      ],
+      "id": "05e84bad-27d7-484f-9580-1754c6eee7dc",
+      "name": "Code: Default Banner Image1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "309ca978-b419-4464-a082-9650206b3162",
+              "leftValue": "={{ /^(with|without)\\s*image$/i.test((($json.message && $json.message.text) || '').trim()) ? 'yes' : 'no' }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        432
+      ],
+      "id": "b7bddfaa-5f51-4e18-958c-c87990a299a3",
+      "name": "Check: Text Is Image Choice1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = String($json.message.chat.id);\nconst text = ($json.message.text || '').trim().toLowerCase();\nconst wantsImage = text === 'with image';\n\nconst staticData = $getWorkflowStaticData('global');\nconst stored = (staticData.pendingSites || {})[chatId];\n\nif (!stored) {\n  throw new Error('No pending site request found for this chat. Please send your business details again to start over.');\n}\n\ndelete staticData.pendingSites[chatId];\n\nreturn [{ json: { ...stored, wantsImage } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        432
+      ],
+      "id": "575119cb-4a7a-429a-abd3-f85f7c2b6907",
+      "name": "Code: Handle Text Image Choice1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// wantsImage may have been set by either the button-tap handler or the\n// typed-reply handler -- only one of them runs per execution, so look up\n// whichever one actually ran instead of assuming a fixed node name.\nlet wantsImage;\ntry {\n  wantsImage = $('Code: Handle Image Choice1').first().json.wantsImage;\n} catch (e) {\n  try {\n    wantsImage = $('Code: Handle Text Image Choice1').first().json.wantsImage;\n  } catch (e2) {\n    wantsImage = true; // safe default if neither ran for some reason\n  }\n}\n\nreturn [{ json: { ...$json, wantsImage } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        448
+      ],
+      "id": "b31f7a22-d9b0-4f8c-a2f2-2ec5b9610c9c",
+      "name": "Code: Determine Wants Image1"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "={{ ($('Code: Handle Image Choice1').isExecuted ? $('Code: Handle Image Choice1').first().json : $('Code: Handle Text Image Choice1').first().json).business.name.replace(/\\s+/g, '_') }}.zip"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        1504
+      ],
+      "id": "c5def42e-dd17-4f3c-9d80-99f3fefb022f",
+      "name": "Send a document",
+      "webhookId": "d88f5e15-d363-4065-aba9-2d8212fcc755",
+      "credentials": {
+        "telegramApi": {
+          "id": "LnRshgST8DyAFMum",
+          "name": "website"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        416
+      ],
+      "id": "39841928-0b3e-4816-976a-8bd306352e0f",
+      "name": "Telegram Trigger",
+      "webhookId": "be5f6dc7-18e0-4f4a-9e93-8893fccd907f",
+      "credentials": {
+        "telegramApi": {
+          "id": "LnRshgST8DyAFMum",
+          "name": "website"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        992
+      ],
+      "id": "62aa986e-2792-43e0-999a-94a5cc8dac0b",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "WlRnhEgSgWd2YNXy",
+          "name": "lyzoo tech 24"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        1120
+      ],
+      "id": "749a4bcf-dfe8-4f33-b490-8823dca53de2",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "K0NJl1hmJ6y1LwpN",
+          "name": "OpenRouter account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Analyze + Plan + SEO1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Missing Fields1": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Ask Missing Info1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Store Data for Image Choice1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Website Content Generator (AI Agent)1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Analyze + Plan + SEO1": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse AI JSON Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Generate Template (HTML + CSS)1": {
+      "main": [
+        [
+          {
+            "node": "Code: Fill index.html1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Fill index.html1": {
+      "main": [
+        [
+          {
+            "node": "Code: Fill style.css1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Fill style.css1": {
+      "main": [
+        [
+          {
+            "node": "Code: Generate SEO Files1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Save All Files to Disk1": {
+      "main": [
+        [
+          {
+            "node": "Compression: ZIP Folder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse Content JSON1": {
+      "main": [
+        [
+          {
+            "node": "Code: Determine Wants Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse AI JSON Output1": {
+      "main": [
+        [
+          {
+            "node": "Check Missing Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Content Generator (AI Agent)1": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse Content JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Generate SEO Files1": {
+      "main": [
+        [
+          {
+            "node": "Merge: SEO Files + Banner Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression: ZIP Folder1": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: SEO Files + Banner Image1": {
+      "main": [
+        [
+          {
+            "node": "Code: Save All Files to Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Banner Prompt Generator1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Banner Prompt Generator1": {
+      "main": [
+        [
+          {
+            "node": "Generate an image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image1": {
+      "main": [
+        [
+          {
+            "node": "Code: Generate Template (HTML + CSS)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge: SEO Files + Banner Image1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Route: Message or Callback1": {
+      "main": [
+        [
+          {
+            "node": "Code: Handle Image Choice1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check: Text Is Image Choice1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Store Data for Image Choice1": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Ask Image Choice1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Handle Image Choice1": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Acknowledge Choice1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Website Content Generator (AI Agent)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Wants Image1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Banner Prompt Generator1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Default Banner Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Default Banner Image1": {
+      "main": [
+        [
+          {
+            "node": "Code: Generate Template (HTML + CSS)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge: SEO Files + Banner Image1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check: Text Is Image Choice1": {
+      "main": [
+        [
+          {
+            "node": "Code: Handle Text Image Choice1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Analyze + Plan + SEO1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Handle Text Image Choice1": {
+      "main": [
+        [
+          {
+            "node": "Website Content Generator (AI Agent)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Determine Wants Image1": {
+      "main": [
+        [
+          {
+            "node": "Check: Wants Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route: Message or Callback1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cf5106a7-0caf-4889-9c0c-73ea0279d587",
+  "meta": {
+    "instanceId": "574af46481f953dbf09ac026c7f9c2fed16f42f20cfce76affe6158e1f383b15"
+  },
+  "nodeGroups": [],
+  "id": "TYcZ9twfvhrvdbfu",
+  "tags": []
+}
